@@ -82,7 +82,6 @@ class DataGenerator(Document):
 		fy = get_fiscal_year()
 		delta = fy.year_end_date - fy.year_start_date
 		dates = [fy.year_start_date + datetime.timedelta(x) for x in range(delta.days + 1)]
-		# customers = frappe.db.get_all("Customer", pluck="name")
 		items = frappe.db.get_all("Item", pluck="name")
 		for x in range(100):
 			si = frappe.new_doc("Sales Invoice")
@@ -99,7 +98,7 @@ class DataGenerator(Document):
 				},
 			)
 			si.save().submit()
-			self.update_stage(f"Sales Invoice {si.name} made")
+			self.update_stage(f"Making Sales Invoice {si.name}")
 
 		self.update_stage("Committing...")
 		frappe.db.commit()
