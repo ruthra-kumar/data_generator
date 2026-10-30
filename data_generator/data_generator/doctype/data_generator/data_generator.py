@@ -27,9 +27,9 @@ class DataGenerator(Document):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.customers = [x.docname for x in self.customer]
+		self.suppliers = [x.docname for x in self.supplier]
 		self.items = [x.docname for x in self.item]
 		self.cc = [x.docname for x in self.cost_center]
-
 
 	def update_stage(self, msg):
 		if task := frappe.get_current_task():

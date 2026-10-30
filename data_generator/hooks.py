@@ -108,7 +108,7 @@ use_json_request_body = True
 # ------------
 
 # before_install = "data_generator.install.before_install"
-# after_install = "data_generator.install.after_install"
+after_install = "data_generator.install.after_install"
 
 # Uninstallation
 # ------------
