@@ -29,10 +29,14 @@ class DataGenerator(Document):
 		self.customers = [x.docname for x in self.customer]
 		self.items = [x.docname for x in self.item]
 		self.cc = [x.docname for x in self.cost_center]
-		self.task = frappe.get_current_task()
+
+
+	def update_stage(self, msg):
+		if task := frappe.get_current_task():
+			task.update_stage(stage=msg)
 
 	def generate_masters(self):
-		self.task.publish_progress(stage="Generating customers...")
+		self.update_stage("Generating customers...")
 		existing_customers = frappe.db.get_all("Customer", pluck="name")
 		for name in self.customers:
 			if name not in existing_customers:
@@ -42,7 +46,7 @@ class DataGenerator(Document):
 				cust.customer_group = "Individual"
 				cust.save()
 
-		self.task.publish_progress(stage="Generating items...")
+		self.update_stage("Generating items...")
 		existing_items = frappe.db.get_all("Item", pluck="name")
 		for name in self.items:
 			if name not in existing_items:
@@ -54,7 +58,8 @@ class DataGenerator(Document):
 				itm.save()
 
 		company = frappe.db.get_all("Company", pluck="name")[0]
-		self.task.publish_progress(stage="Generating cost centers...")
+
+		self.update_stage("Generating cost centers...")
 		# 'Main' is available on normal installation
 		main_cc_name = frappe.db.get_all("Cost Center", {"cost_center_name": "Main", "company": company})[0]
 		main_cc = frappe.get_doc("Cost Center", main_cc_name)
@@ -72,7 +77,7 @@ class DataGenerator(Document):
 
 		from erpnext.accounts.utils import get_fiscal_year
 
-		self.task.publish_progress(stage="Generating Sales Invoices...")
+		self.update_stage("Generating sales invoices...")
 		company = frappe.db.get_all("Company", pluck="name")[0]
 		fy = get_fiscal_year()
 		delta = fy.year_end_date - fy.year_start_date
@@ -94,9 +99,10 @@ class DataGenerator(Document):
 				},
 			)
 			si.save().submit()
+			self.update_stage(f"Sales Invoice {si.name} made")
 
+		self.update_stage("Committing...")
 		frappe.db.commit()
-		print("100 Sales invoices made")
 
 	@frappe.whitelist()
 	def generate(self):
